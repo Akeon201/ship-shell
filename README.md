@@ -1,2 +1,2 @@
-# sush
+# ship-shell
 Shippensburg University Shell
