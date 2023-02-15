@@ -8,10 +8,13 @@ void bashMode(char **argv) {
     FILE *fp = fopen(argv[1], "r");
     char line[301];
 
-    if (fp == NULL)
-        printf("ERROR: FILE NOT FOUND");
-
-    while (fgets(line, 300, fp)) {
-        printf("%s", line);
+    if (fp == NULL) {
+        printf("ERROR: FILE NOT FOUND\n");
+    }
+    else {
+        while (fgets(line, 300, fp)) {
+            printf("%s", line);
+        }
+        printf("\n");
     }
 }

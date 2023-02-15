@@ -9,6 +9,14 @@ ship-shell:
 clean:
 	rm -f *.o
 
-wish:
-	gcc ./*.c -o wish
-	$(clean)
+bash.o: bash.c
+	gcc -c bash.c
+
+interactive.o: interactive.c
+	gcc -c interactive.c
+
+shell.o: shell.c
+	gcc -c shell.c
+
+wish: bash.o interactive.o shell.o
+	gcc -o wish bash.o interactive.o shell.o
