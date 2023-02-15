@@ -11,3 +11,4 @@ clean:
 
 wish:
 	gcc ./*.c -o wish
+	$(clean)

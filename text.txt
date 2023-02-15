@@ -1,4 +1,0 @@
-$ sh run-tests.sh
-: not foundh: 2:
-: not foundh: 6:
-run-tests.sh: 9: local: not in a function
