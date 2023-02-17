@@ -14,6 +14,7 @@ char *words[LINELIMIT/2];
 char *str;
 int num;
 int num2;
+int lineNum = 0;
 
 void interactiveMode() {
 
@@ -32,6 +33,7 @@ void interactiveMode() {
         }
 
         num2 = 0;
+        //printf("Line%d: ", ++lineNum);
         while (num2 < num ) {
             printf("%s ", words[num2++]);
         }

@@ -20,3 +20,4 @@ shell.o: shell.c
 
 wish: bash.o interactive.o shell.o
 	gcc -o wish bash.o interactive.o shell.o
+    $(clean)
