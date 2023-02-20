@@ -45,7 +45,6 @@ int main(int argc, char const *argv[]) {
         result = bashMode(words, size);
         if (result) { printerror(); }
         size = 0;
-        int i = 0;
 
 
 

@@ -36,7 +36,7 @@ char** getPaths() {
     char **paths = malloc((numlines + 1) * sizeof(char*));
     int i = 0;
     while (fgets(line, sizeof(line), pf) != NULL) {
-        paths[i++] = strdup(line);
+        paths[i++] = strtok(strdup(line), " \t\r\n");
     }
     paths[i] = NULL;
 
@@ -60,6 +60,7 @@ int setPaths(char **paths) {
 
     if (paths[1] == NULL) {
         ftruncate(fileno(pf), 0);
+        fclose(pf);
         return 0;
     }
 

@@ -153,7 +153,7 @@ int performLocalCommand(char **arr) {
     if (!strcmp(arr[0], commandList[2]) && length != 1) { return 1; }
         //printf("point 6\n");
     if (!strcmp(arr[0], commandList[2]) && length == 1) {
-        //printf("point 7\n");
+        printf("EXITING.....  \n");
         exit(0);
     }
     //printf("point 9\n");
@@ -162,6 +162,7 @@ int performLocalCommand(char **arr) {
 }
 
 int executeCommand(char **arr) {
+    if (arr == NULL || arr[0] == NULL) { return 1; }
     printf("point 5\n");
     char **paths = getPaths();
     char path[100] = {'\0'};
@@ -169,20 +170,20 @@ int executeCommand(char **arr) {
     printf("point 6\n");
 
     int x = 0;
-    while (paths[x]!=NULL) {
-        printf("%s\n", paths[x++]);
+    while (arr[x]!=NULL) {
+        printf("%s\n", arr[x++]);
     }
-    printf("%d\n", x);
+
     printf("point 7\n");
 
     int i = 0;
     while (paths[i] != NULL) {
         strcat(path, paths[i]);
-        //printf("%s\n", path);
+        printf("%s\n", path);
         strcat(path, "/");
-        //printf("%s\n", path);
+        printf("%s\n", path);
         strcat(path, arr[0]);
-        //printf("%s\n", path);
+        printf("%s\n", path);
         execv(path, arr);
         i++;
     }
