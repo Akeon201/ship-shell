@@ -1,6 +1,5 @@
 
 #Author: Kenyon Leblanc
-#Date Modified: 02/11/23
 
 ship-shell:
 	gcc ./*.c -o ship-shell
@@ -8,7 +7,6 @@ ship-shell:
 
 wish: bash.o interactive.o shell.o shellerror.o path.o
 	gcc -o wish bash.o interactive.o shell.o shellerror.o path.o
-    $(clean)
 
 clean:
 	rm -f *.o

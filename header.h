@@ -1,19 +1,38 @@
 #if !defined(header)
 #define header
 
-/// @brief User has choosen the interactive mode.
-int interactiveMode();
-/// @brief User has choosen the bash mode.
+/**
+ * This is the interactive mode for my shell.
+*/
+void interactiveMode();
+
+/**
+ * This provides the bash functionality.
+ * 
+ * @param voice Array of string commands terminating with NULL
+ * @param size Number of strings
+ * @return 0 for success, 1 for failure
+*/
 int bashMode(char **voice, int size);
-/// @brief prints error
+
+/**
+ * Prints an error, what else would it do?
+*/
 void printerror();
-/// @brief Gets executable paths
-/// @return returns pointer to array of strings
+
+/**
+ * Gets known paths.
+ *
+ * @return array of strings terminating with null. It may return NULL.
+*/
 char** getPaths();
-/// @brief Set the executable paths, persisting
-/// @param paths array of strings to set path to
+
+/**
+ * Set the paths
+ *
+ * @param arr array of strings terminating with NULL
+ * @return 0 if success, 1 if failure
+*/
 int setPaths(char **paths);
-/// @brief Free char** array
-void freeArr(char**);
 
 #endif // header

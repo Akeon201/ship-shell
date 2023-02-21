@@ -3,7 +3,6 @@
 #include <string.h>
 #include "header.h"
 
-void freeArr(char**);
 char** getLines(const char*);
 
 /**
@@ -13,11 +12,12 @@ char** getLines(const char*);
 */
 int main(int argc, char const *argv[]) {
 
+    //Enter interactive mode
     if (argc==1) {
-        if (interactiveMode()) { return 1; }
+        interactiveMode();
     }
+    //Run bash mode with a text file
     else {
-        //printf("point 1-1\n");
         char **textCommands = getLines(argv[1]);
         char *words[101];
         char *str;
@@ -25,32 +25,25 @@ int main(int argc, char const *argv[]) {
         int i = 0;
         int result;
 
-        //printf("point 2\n");
         while (textCommands[i] != NULL) {
 
-
-        //printf("point 1-1\n");
         str = strtok(textCommands[i++], " \t\r\n");
 
         while (str != NULL) {
-            //printf("point 2-2\n");
             words[size++] = str;
-            //printf("%s\n", str);
             str = strtok(NULL, " \t\r\n");
         }
         words[size] = NULL;
-        //printf("%d", size);
 
-        //printf("point 3-3\n");
         result = bashMode(words, size);
+
         if (result) { printerror(); }
+        
         size--;
-        //printf("point 4-4\n");
         while (size > -1) {
             words[size] = NULL;
             size--;
         }
-        //printf("point 5-5\n");
         size = 0;
 
 
@@ -63,22 +56,9 @@ int main(int argc, char const *argv[]) {
 }
 
 /**
- * Free a char** pointer.
-*/
-void freeArr(char **arr) {
-    if (arr != NULL){
-        int i = 0;
-        while (arr[i] != NULL) {
-            free(arr[i++]);
-        }
-        free(arr);
-    }
-}
-
-/**
- * Attempts to read a file.
+ * Read text from a file.
  *
- * @return Array of strings.
+ * @return Array of strings terminating with NULL
 */
 char** getLines(const char *file) {
     if (file == NULL) {
