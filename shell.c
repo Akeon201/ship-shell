@@ -17,7 +17,7 @@ int main(int argc, char const *argv[]) {
         if (interactiveMode()) { return 1; }
     }
     else {
-        //printf("point 1\n");
+        //printf("point 1-1\n");
         char **textCommands = getLines(argv[1]);
         char *words[101];
         char *str;
@@ -29,11 +29,11 @@ int main(int argc, char const *argv[]) {
         while (textCommands[i] != NULL) {
 
 
-      //  printf("point 3\n");
+        //printf("point 1-1\n");
         str = strtok(textCommands[i++], " \t\r\n");
 
         while (str != NULL) {
-        //    printf("point 4\n");
+            //printf("point 2-2\n");
             words[size++] = str;
             //printf("%s\n", str);
             str = strtok(NULL, " \t\r\n");
@@ -41,9 +41,16 @@ int main(int argc, char const *argv[]) {
         words[size] = NULL;
         //printf("%d", size);
 
-        //printf("point 5\n");
+        //printf("point 3-3\n");
         result = bashMode(words, size);
         if (result) { printerror(); }
+        size--;
+        //printf("point 4-4\n");
+        while (size > -1) {
+            words[size] = NULL;
+            size--;
+        }
+        //printf("point 5-5\n");
         size = 0;
 
 

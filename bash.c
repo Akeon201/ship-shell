@@ -21,6 +21,7 @@ int redirLink;
 int numCommands;
 int localCommands;
 int length;
+int result;
 char *commandList[] = {"cd", "path", "exit", NULL};
 
 /**
@@ -30,24 +31,24 @@ char *commandList[] = {"cd", "path", "exit", NULL};
 */
 int bashMode(char **voice, int size) {
     resetGlobalVariables();
-         //int x = 0;
-    //while (voice[x]!=NULL) {
-   //     printf("%s\n", voice[x++]);
-  // }
-  //  printf("%d\n", x);
+        // int x = 0;
+   // while (voice[x]!=NULL) {
+        //printf("%s\n", voice[x++]);
+//   }
+    //printf("%d\n", x);
   //  printf("point 1\n");
     int checkLC = checkForLocalCommands(voice);
     int checkOP = checkOperators(voice);
     length = size;
 
- //   printf("point 2\n");
+//    printf("point 2\n");
 
 
     if (checkLC == -1 || checkOP == -1) { return 1; }
-    //printf("point 3\n");
+  //  printf("point 3\n");
 
-    if (checkLC > 0 && !checkOP) {
-        //printf("point 4\n");
+    if (checkLC == 1 && !checkOP) {
+       // printf("point 4\n");
         if (performLocalCommand(voice)) {
             return 1;
         }
@@ -138,6 +139,8 @@ int performLocalCommand(char **arr) {
         //printf("point 8\n");
         if (result) {
             return 1;
+        } else {
+            return 0;
         }
     }
     //printf("point 9\n");
@@ -146,6 +149,8 @@ int performLocalCommand(char **arr) {
         result = setPaths(arr);
         if (result) {
             return 1;
+        } else {
+            return 0;
         }
     }
 
@@ -153,44 +158,57 @@ int performLocalCommand(char **arr) {
     if (!strcmp(arr[0], commandList[2]) && length != 1) { return 1; }
         //printf("point 6\n");
     if (!strcmp(arr[0], commandList[2]) && length == 1) {
-        printf("EXITING.....  \n");
+       // printf("EXITING.....  \n");
         exit(0);
     }
-    //printf("point 9\n");
+  //  printf("point 9\n");
 
     return 0;
 }
 
 int executeCommand(char **arr) {
     if (arr == NULL || arr[0] == NULL) { return 1; }
-    printf("point 5\n");
+    //printf("point 4-4\n");
+    pid_t pid;
     char **paths = getPaths();
+
+    //printf("point 6\n");
     char path[100] = {'\0'};
+    //printf("point 7\n");
 
-    printf("point 6\n");
-
+    //printf("point 8\n");
+/**
     int x = 0;
-    while (arr[x]!=NULL) {
-        printf("%s\n", arr[x++]);
+    while (paths[x]!=NULL) {
+        printf("%s\n", paths[x++]);
     }
-
-    printf("point 7\n");
+*/
+   // printf("point 9\n");
 
     int i = 0;
-    while (paths[i] != NULL) {
-        strcat(path, paths[i]);
-        printf("%s\n", path);
-        strcat(path, "/");
-        printf("%s\n", path);
-        strcat(path, arr[0]);
-        printf("%s\n", path);
-        execv(path, arr);
-        i++;
+    pid = fork();
+    if (!pid) {
+        while (paths[i] != NULL) {
+            strcat(path, paths[i]);
+            //printf("%s\n", path);
+            strcat(path, "/");
+            //printf("%s\n", path);
+            strcat(path, arr[0]);
+            printf("%s\n", path);
+            if (execv(path, arr) != -1) { exit(0); }
+            i++;
+        }
+    } else {
+        waitpid(pid, &result, 0);
+        if (result == -1) { 
+            return 1; 
+        } else {
+            return 0;
+        }
     }
 
-printf("%s\n", path);
-    freeArr(paths);
-    return 0;
+    printerror();
+    exit(1);
 }
 
 /**
@@ -203,4 +221,5 @@ void resetGlobalVariables() {
     numCommands = 0;
     localCommands = 0;
     length = 0;
+    result = 0;
 }
