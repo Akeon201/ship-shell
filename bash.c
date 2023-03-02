@@ -13,6 +13,7 @@ int checkForLocalCommands(char**);
 int executeCommand(char**);
 int performLocalCommand(char**);
 void resetGlobalVariables();
+void setNull(char*);
 
 int ampNum;                                             //# of ampersands
 int redirNum;                                           //# of redirects
@@ -175,6 +176,10 @@ int executeCommand(char **arr) {
     char path[100] = {'\0'};
 
     int i = 0;
+   // while (paths[i] != NULL) {
+  //      printf("%s XXXXXXXXXXXXXXXXXXXXX\n", paths[i++]);
+   // }
+  //  i = 0;
     pid = fork();
     if (!pid) {
         while (paths[i] != NULL) {
@@ -182,6 +187,7 @@ int executeCommand(char **arr) {
             strcat(path, "/");
             strcat(path, arr[0]);
             if (execv(path, arr) != -1) { exit(0); }
+            setNull(path);
             i++;
         }
     } else {
@@ -208,4 +214,14 @@ void resetGlobalVariables() {
     localCommands = 0;
     length = 0;
     result = 0;
+}
+/**
+ * Reset the path string.
+*/
+
+void setNull(char *arr) {
+    int i = 0;
+    while (arr[i] != '\0') {
+        arr[i++] = '\0';
+    }
 }
