@@ -35,4 +35,9 @@ char** getPaths();
 */
 int setPaths(char **paths);
 
+/**
+ * Free paths
+*/
+void freePaths();
+
 #endif // header

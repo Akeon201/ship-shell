@@ -156,6 +156,7 @@ int performLocalCommand(char **arr) {
     //exit command
     if (!strcmp(arr[0], commandList[2]) && length != 1) { return 1; }   //exit must be alone or throw error
     if (!strcmp(arr[0], commandList[2]) && length == 1) {
+        freePaths();
         exit(0);
     }
 
@@ -176,10 +177,10 @@ int executeCommand(char **arr) {
     char path[100] = {'\0'};
 
     int i = 0;
-   // while (paths[i] != NULL) {
-  //      printf("%s XXXXXXXXXXXXXXXXXXXXX\n", paths[i++]);
-   // }
-  //  i = 0;
+    //while (paths[i] != NULL) {
+   //     printf("%s XXXXXXXXXXXXXXXXXXXXX\n", paths[i++]);
+    //}
+    //i = 0;
     pid = fork();
     if (!pid) {
         while (paths[i] != NULL) {

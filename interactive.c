@@ -25,7 +25,8 @@ void interactiveMode() {
         if ((path = getcwd(NULL, 0)) == NULL) { exit(1); }
 
         printf("ship-shell:> %s$ ", path);
-
+        
+        free(path);
         size = 0;
         
         fgets(line, LINELIMIT, stdin);
@@ -43,6 +44,5 @@ void interactiveMode() {
             words[--size] = NULL; 
         }
 
-        free(path);
     }
 }
