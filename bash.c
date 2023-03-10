@@ -175,8 +175,10 @@ int performLocalCommand(char **arr) {
 */
 int executeCommand(char **arr) {
     if (arr == NULL || arr[0] == NULL) { return 1; }
-
     pid_t pid;
+    int rwPipe[2];
+    char message[] = "N";               //Message sent in pipe if no executable is found
+    char buff[2];
     char **paths = getPaths();
     char path[100] = {'\0'};
 
@@ -186,8 +188,11 @@ int executeCommand(char **arr) {
    // }
    // i = 0;
   // printf("1-1\n");
+    if (pipe(rwPipe) == -1) { exit(1); }
     pid = fork();
+    if (pid == -1) { return 1; }
     if (!pid) {
+        close(rwPipe[0]);
         while (paths[i] != NULL) {
             strcat(path, paths[i]);
             strcat(path, "/");
@@ -196,16 +201,25 @@ int executeCommand(char **arr) {
             setNull(path);
             i++;
         }
+        write(rwPipe[1], message, sizeof(message));
+        close(rwPipe[1]);
         exit(1);
     } else {
        // printf("2-2: %s, %s, %d\n", arr[0], arr[1], length);
         waitpid(pid, &result, 0);
-        if (result && length == 1 && checkForFile(arr[0])) { 
-           // printf("3-3\n");
-           return bash(arr[0]);
+        close(rwPipe[1]);
+        read(rwPipe[0], buff, sizeof(buff));
+        close(rwPipe[0]);
+        if (result && length == 1 && checkForFile(arr[0]) && !strcmp(buff, message)) { 
+            //printf("3-3\n");
+            return bash(arr[0]);
         } else if (!result) {
             return 0;
+        } else if (result && strcmp(buff, message)) {
+            return 0;
         }
+        //printf("Result: %d strcmp: %d", result, strcmp(buff, message));
+        return 1;
     }
     return 1;
 
