@@ -14,6 +14,10 @@ int executeCommand(char**);
 int performLocalCommand(char**);
 void resetGlobalVariables();
 void setNull(char*);
+char** getLines(const char *file);
+void setNull(char *arr);
+int checkForFile(char *file);
+void addPathToFileString(char **file);
 
 int ampNum;                                             //# of ampersands
 int redirNum;                                           //# of redirects
@@ -25,7 +29,7 @@ int result;                                             //results
 char *commandList[] = {"cd", "path", "exit", NULL};     //array of built in commands ending with NULL
 
 /**
- * This provides the bash functionality.
+ * This provides the command functionality.
  *
  * Author: Kenyon Leblanc
  * 
@@ -33,7 +37,7 @@ char *commandList[] = {"cd", "path", "exit", NULL};     //array of built in comm
  * @param size Number of strings
  * @return 0 for success, 1 for failure
 */
-int bashMode(char **voice, int size) {
+int commandMode(char **voice, int size) {
     if (voice == NULL || voice[0] == NULL) { return 1; }
     
     resetGlobalVariables();
@@ -156,7 +160,7 @@ int performLocalCommand(char **arr) {
     //exit command
     if (!strcmp(arr[0], commandList[2]) && length != 1) { return 1; }   //exit must be alone or throw error
     if (!strcmp(arr[0], commandList[2]) && length == 1) {
-        freePaths();
+        //freePaths();
         exit(0);
     }
 
@@ -177,31 +181,34 @@ int executeCommand(char **arr) {
     char path[100] = {'\0'};
 
     int i = 0;
-    //while (paths[i] != NULL) {
-   //     printf("%s XXXXXXXXXXXXXXXXXXXXX\n", paths[i++]);
-    //}
-    //i = 0;
+   // while (paths[i] != NULL) {
+   //     printf("<<<<<<<<  %s  >>>>>>>>>\n", paths[i++]);
+   // }
+   // i = 0;
+  // printf("1-1\n");
     pid = fork();
     if (!pid) {
         while (paths[i] != NULL) {
             strcat(path, paths[i]);
             strcat(path, "/");
             strcat(path, arr[0]);
-            if (execv(path, arr) != -1) { exit(0); }
+            execv(path, arr);
             setNull(path);
             i++;
         }
+        exit(1);
     } else {
+       // printf("2-2: %s, %s, %d\n", arr[0], arr[1], length);
         waitpid(pid, &result, 0);
-        if (result == -1) { 
-            return 1; 
-        } else {
+        if (result && length == 1 && checkForFile(arr[0])) { 
+           // printf("3-3\n");
+           return bash(arr[0]);
+        } else if (!result) {
             return 0;
         }
     }
+    return 1;
 
-    printerror();
-    exit(1);
 }
 
 /**
@@ -216,13 +223,197 @@ void resetGlobalVariables() {
     length = 0;
     result = 0;
 }
+
 /**
  * Reset the path string.
 */
-
 void setNull(char *arr) {
     int i = 0;
     while (arr[i] != '\0') {
         arr[i++] = '\0';
     }
+}
+
+/**
+ * Takes in a file name and attempts to execute commands line by line in file.
+*/
+int bash(const char* word) {
+   // printf("1\n");
+    char **textCommands = getLines(word);
+    if (textCommands == NULL && checkForFile(word)) { return 0; } else if (textCommands == NULL) { return 1; }
+    char *words[101];
+    char *str;
+    int size = 0;
+    int i = 0;
+    //printf("7\n");
+
+    int x = 1;
+
+    while (textCommands[i] != NULL) {
+
+    str = strtok(textCommands[i++], " \t\r\n");
+
+    while (str != NULL) {
+        words[size++] = str;
+        str = strtok(NULL, " \t\r\n");
+    }
+    words[size] = NULL;
+    
+   // printf("Command%d: %s\n", x++, words[0]);
+    if ( commandMode(words, size) ) { printerror(); }
+        
+    size--;
+    while (size > -1) {
+        words[size] = NULL;
+        size--;
+    }
+    size = 0;
+
+    }
+    //printf("9\n");
+
+    freeArr(textCommands);
+    return 0;
+}
+
+/**
+ * Free pointer to pointers.
+*/
+void freeArr(char **arr) {
+    int i = 0;
+    while( arr[i] != NULL) { free(arr[i++]); }
+    free(arr);
+}
+
+/**
+ * Read text from a file. MUST FREE RETURNED POINTERS.
+ *
+ * @return Array of strings terminating with NULL. Returns NULL if error.
+*/
+char** getLines(const char *file) {
+    if (file == NULL) { return NULL; }
+    FILE *pf = fopen(file, "r");
+       // printf("2 - %s\n", file);
+    char line[100];
+    int numlines = 0;
+    char **pths = getPaths();
+    int i = 0;
+
+    if (pf == NULL) {
+        char path[100] = {'\0'};
+        while (pf == NULL && pths[i] != NULL) {
+            strcat(path, pths[i]);
+            strcat(path, "/");
+            strcat(path, file);
+            pf = fopen(path, "r");
+            setNull(path);
+            i++;
+        }
+    }
+    if (pf == NULL) { return NULL; }
+   // printf("3\n");
+
+    char c;
+    while (feof(pf) == 0) {
+        if ((c = fgetc(pf)) == '\n') { numlines++; }
+    }
+    rewind(pf);
+   // printf("4\n");
+
+    char **paths = malloc((numlines + 1) * sizeof(char*));
+    if (paths == NULL) { return NULL; }
+   // printf("5\n");
+
+    i = 0;
+    while (fgets(line, sizeof(line), pf) != NULL) { 
+        paths[i] = strdup(line); 
+        //printf("File contents: %s", paths[i]);
+        i++;
+    }
+    paths[i] = NULL;
+   // printf("6\n");
+
+    fclose(pf);
+
+    return paths;
+}
+
+/**
+ * Check if file exists.
+ * 
+ * @return 1 for yes, 0 for no
+*/
+int checkForFile(char *file) {
+    int temp = 0;
+    char **paths = getPaths();
+    char path[100] = {'\0'};
+    int i = 0;
+
+    while (paths[i] != NULL && !temp) {
+        strcat(path, paths[i]);
+        strcat(path, "/");
+        strcat(path, file);
+        if (!access(path, F_OK | R_OK)) { temp++; }
+        setNull(path);
+        i++;
+    }
+    if (temp) { return 1; }
+
+    strcat(path, abPath);
+    strcat(path, "/");
+    strcat(path, file);
+    if (!access(path, F_OK | R_OK)) { temp++; }
+    setNull(path);
+
+    if (temp) { return 1; }
+
+    return 0;
+}
+\
+/**
+ * Feed in an existing file name to change string to absolute path
+*/
+void addPathToFileString(char **file) {
+    int temp = 0;
+    char **paths = getPaths();
+    char path[100] = {'\0'};
+    char *tempName = strdup(*file); //free
+    int i = 0;
+
+    while (paths[i] != NULL && !temp) {
+        strcat(path, paths[i]);
+        strcat(path, "/");
+        strcat(path, *file);
+        if (!access(path, F_OK | R_OK)) { temp++; }
+        setNull(path);
+        i++;
+    }
+    i--;
+    if (temp) {
+        free(*file);
+        *file = malloc(sizeof(char) * (strlen(paths[i]) + strlen(tempName) + 2));
+        *file = strdup(paths[i]);
+        strcat(*file, "/");
+        strcat(*file, tempName);
+        free(tempName);
+        return;        
+    }
+
+    strcat(path, abPath);
+    strcat(path, "/");
+    strcat(path, *file);
+    if (!access(path, F_OK | R_OK)) { temp++; }
+    //setNull(path);
+    if (temp) {
+        free(*file);
+        *file = malloc(sizeof(char) * (strlen(abPath) + strlen(tempName) + 2));
+        *file = strdup(abPath);
+        strcat(*file, "/");
+        strcat(*file, tempName);
+        free(tempName);
+        return;        
+    }
+
+    free(tempName);
+    return;
 }

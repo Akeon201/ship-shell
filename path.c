@@ -82,5 +82,7 @@ int setPaths(char **arr) {
 */
 void freePaths() {
     int i = 0;
-    if (check) { while (paths[i] != NULL) { free(paths[i++]); } }
+    if (check) { 
+        while (paths[i] != NULL) { free(paths[i++]); } 
+}
 }

@@ -38,7 +38,7 @@ void interactiveMode() {
             str = strtok(NULL, " \t\r\n");
         }
         
-        if (bashMode(words, size)) { printerror(); }
+        if (commandMode(words, size)) { printerror(); }
 
         while (size > 0) { 
             words[--size] = NULL; 

@@ -1,6 +1,8 @@
 #if !defined(header)
 #define header
 
+extern char *abPath;
+
 /**
  * This is the interactive mode for my shell.
 */
@@ -13,7 +15,7 @@ void interactiveMode();
  * @param size Number of strings
  * @return 0 for success, 1 for failure
 */
-int bashMode(char **voice, int size);
+int commandMode(char **voice, int size);
 
 /**
  * Prints an error, what else would it do?
@@ -39,5 +41,15 @@ int setPaths(char **paths);
  * Free paths
 */
 void freePaths();
+
+/**
+ * Free pointer to pointers.
+*/
+void freeArr(char **arr);
+
+/**
+ * Takes in a file name and attempts to execute commands line by line in file.
+*/
+int bash(const char* word);
 
 #endif // header
