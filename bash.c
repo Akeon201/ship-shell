@@ -89,6 +89,9 @@ int checkOperators(char **arr) {
     if (redirNum > 1) { return -1; }
     if (ampNum > 0 && redirNum > 0) { return -1; }
 
+    //If too many or no file trailing >
+    if (redirNum && (arr[redirLink] == NULL || arr[redirLink+1] != NULL)) { return -1; }
+
     //If ampersands and redirections found.
     if (ampNum > 0 || redirNum > 0) { return 1; }
 
