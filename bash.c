@@ -2,11 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include "header.h"
 
-#define AMPER "&"
-#define REDIR ">"
+#define AMPER_STR "&"
+#define REDIR_STR ">"
+#define AMPER_CHAR '&'
+#define REDIR_CHAR '>'
+#define LINELIMIT 301
 
 int checkOperators(char**);
 int checkForLocalCommands(char**);
@@ -18,10 +22,12 @@ char** getLines(const char *file);
 void setNull(char *arr);
 int checkForFile(char *file);
 void addPathToFileString(char **file);
+void addSpaces(char **str, char key);
+void redirectStream(char **arr);
 
 int ampNum;                                             //# of ampersands
 int redirNum;                                           //# of redirects
-int redirLink;                                          //spot in array that filestream should be pointed to
+int redirSpot;                                          //spot in array that > appears
 int numCommands;                                        //number of arguments. If no ampersents 1, otherwise N+1
 int localCommands;                                      //# of local built in commands found
 int length;                                             //size of array voice
@@ -74,12 +80,12 @@ int checkOperators(char **arr) {
 
     int i = 0;
     while (arr[i] != NULL) {
-        if (!strcmp(arr[i], AMPER)) { 
+        if (!strcmp(arr[i], AMPER_STR)) { 
             ampNum++; 
         }
-        if (!strcmp(arr[i], REDIR)) {
+        if (!strcmp(arr[i], REDIR_STR)) {
             redirNum++;
-            redirLink = i + 1;
+            redirSpot = i;
         }
         i++;
     }
@@ -90,7 +96,7 @@ int checkOperators(char **arr) {
     if (ampNum > 0 && redirNum > 0) { return -1; }
 
     //If too many or no file trailing >
-    if (redirNum && (arr[redirLink] == NULL || arr[redirLink+1] != NULL)) { return -1; }
+    if (redirNum && (arr[redirSpot+1] == NULL || arr[redirSpot + 2] != NULL || !strcmp(arr[0], REDIR_STR))) { return -1; }
 
     //If ampersands and redirections found.
     if (ampNum > 0 || redirNum > 0) { return 1; }
@@ -186,16 +192,18 @@ int executeCommand(char **arr) {
     char path[100] = {'\0'};
 
     int i = 0;
-   // while (paths[i] != NULL) {
-   //     printf("<<<<<<<<  %s  >>>>>>>>>\n", paths[i++]);
-   // }
-   // i = 0;
-  // printf("1-1\n");
+   // while (arr[i] != NULL) {
+   //     printf("<<<<<<<<  %s  >>>>>>>>>\n", arr[i++]);
+    //}
+  //  i = 0;
+   //printf("1-1\n");
     if (pipe(rwPipe) == -1) { exit(1); }
     pid = fork();
-    if (pid == -1) { return 1; }
     if (!pid) {
+       // printf("1-1\n");
         close(rwPipe[0]);
+        //printf("%d\n", redirNum);
+        if (redirNum) { redirectStream(arr); }
         while (paths[i] != NULL) {
             strcat(path, paths[i]);
             strcat(path, "/");
@@ -234,7 +242,7 @@ int executeCommand(char **arr) {
 void resetGlobalVariables() {
     ampNum = 0;
     redirNum = 0;
-    redirLink = 0;
+    redirSpot = 0;
     numCommands = 0;
     localCommands = 0;
     length = 0;
@@ -312,8 +320,7 @@ void freeArr(char **arr) {
 char** getLines(const char *file) {
     if (file == NULL) { return NULL; }
     FILE *pf = fopen(file, "r");
-       // printf("2 - %s\n", file);
-    char line[100];
+   // printf("2\n");
     int numlines = 0;
     char **pths = getPaths();
     int i = 0;
@@ -330,25 +337,36 @@ char** getLines(const char *file) {
         }
     }
     if (pf == NULL) { return NULL; }
-   // printf("3\n");
+    //printf("3\n");
 
     char c;
     while (feof(pf) == 0) {
         if ((c = fgetc(pf)) == '\n') { numlines++; }
     }
     rewind(pf);
-   // printf("4\n");
+    //printf("4\n");
 
     char **paths = malloc((numlines + 1) * sizeof(char*));
     if (paths == NULL) { return NULL; }
    // printf("5\n");
 
+   
+    char *line = malloc(LINELIMIT);
+    if (!line) { exit(1); }
     i = 0;
-    while (fgets(line, sizeof(line), pf) != NULL) { 
+    while (fgets(line, LINELIMIT, pf) != NULL) { 
+       // printf("6\n");
+        //printf("File lines: %s", line);
+        addSpaces(&line, REDIR_CHAR);
+        addSpaces(&line, AMPER_CHAR);
+      //  printf("7\n");
+       // printf("File lines AFTER: %s", line);
         paths[i] = strdup(line); 
-        //printf("File contents: %s", paths[i]);
+        free(line);
+        line = malloc(LINELIMIT);
         i++;
     }
+    free(line);
     paths[i] = NULL;
    // printf("6\n");
 
@@ -435,4 +453,59 @@ void addPathToFileString(char **file) {
 
     free(tempName);
     return;
+}
+
+/**
+ * Adds spaces between key characters. Takes a *string and character key.
+*/
+void addSpaces(char **str, char key) {
+    int spaceNum = 0;
+    int i = 0;
+
+    //printf("POINT 1\n");
+    while ((*str)[i]) { 
+                //printf("POINT 2\n");
+
+        if ((*str)[i] == key && (*str)[i-1] != ' ') { spaceNum++; }
+        if ((*str)[i] == key && (*str)[i+1] != ' ') { spaceNum++; }
+        i++;
+    }
+    i = 0;
+        //printf("POINT 3 - %d\n", spaceNum);
+
+
+    if (!spaceNum || (*str)[0] == key || (*str)[1] == key) { return; }
+
+    int len = strlen(*str);
+    int x = 0;
+    char *temp = malloc(len + spaceNum + 1);
+    //printf("POINT 3\n");
+
+    while ((*str)[i]) {
+        if ((*str)[i] == key && (*str)[i-1] != ' ' && i != 0) { temp[x++] = ' '; }
+        if ((*str)[i-1] == key && (*str)[i] != ' ' && i != len) { temp[x++] = ' '; }
+        temp[x++] = (*str)[i++];
+    }
+    temp[x] = '\0';
+
+    free(*str);
+    *str = temp;
+}
+
+/**
+ * Redirect file stream and frees > and file
+*/
+void redirectStream(char **arr) {
+    //int len = strlen(arr[redirSpot+1]);
+    //char temp[len+1];
+    //strcpy(temp, arr[redirSpot+1]);
+    //temp[len] = '\0';
+    //int i = 0;
+    //while (arr[i]) { printf("%s\n", arr[i++]); }
+    close(STDOUT_FILENO);
+    freopen(arr[redirSpot+1], "w", stdout);
+    //free(arr[redirSpot+1]);
+    arr[redirSpot] = NULL;
+    //i = 0;
+    //while (arr[i]) { printf("%s", arr[i++]); }
 }

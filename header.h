@@ -52,4 +52,9 @@ void freeArr(char **arr);
 */
 int bash(const char* word);
 
+/**
+ * Adds spaces between key characters. Takes a *string and character key.
+*/
+void addSpaces(char **str, char key);
+
 #endif // header

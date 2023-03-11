@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "header.h"
 
-#define LINELIMIT 300
+#define LINELIMIT 301
 
 char line[LINELIMIT];
 char *words[(LINELIMIT/3)+1];
@@ -34,6 +34,8 @@ void interactiveMode() {
         str = strtok(line, " \t\r\n");
 
         while (str != NULL) {
+            //printf("HERE!!!!!!!! >>>>>>>>>>>>>>>>>>>  :%s", str);
+            addSpaces(&str, '>');
             words[size++] = str;
             str = strtok(NULL, " \t\r\n");
         }
