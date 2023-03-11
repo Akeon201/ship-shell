@@ -14,6 +14,10 @@ char *abPath;
  * Author: Kenyon Leblanc
 */
 int main(int argc, char const *argv[]) {
+    if (argc > 2) {
+        printerror();
+        return 1;
+    }
     setabPath();
     //char **arr = getPaths();
    // int i = 0;

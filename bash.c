@@ -264,8 +264,8 @@ int bash(const char* word) {
     int i = 0;
     //printf("7\n");
 
-    int x = 1;
-
+    //while (textCommands[i] == NULL) { i++; }
+    //int x = 0;
     while (textCommands[i] != NULL) {
 
     str = strtok(textCommands[i++], " \t\r\n");
@@ -277,7 +277,9 @@ int bash(const char* word) {
     words[size] = NULL;
     
    // printf("Command%d: %s\n", x++, words[0]);
-    if ( commandMode(words, size) ) { printerror(); }
+    //x = 0;
+    if ( commandMode(words, size) && words != NULL && words[0] != NULL ) { printerror(); }
+   // x++;
         
     size--;
     while (size > -1) {
