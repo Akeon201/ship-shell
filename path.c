@@ -29,12 +29,10 @@ char** getPaths() {
  * @return 0 if success, 1 if failure
 */
 int setPaths(char **arr) {
-   // printf("p1\n");
     char *cwd;
     if ((cwd = getcwd(NULL,0)) == NULL) { exit(1); }
     int i = 0;
     int j = 0;
-    //printf("p2\n");
 
     if (!check) {
         while (paths[i] != NULL) { paths[i++] = NULL; }
@@ -42,13 +40,11 @@ int setPaths(char **arr) {
     } else {
         while (paths[i] != NULL) { free(paths[i++]); }
     }
-   // printf("p3\n");
 
     if (arr[1] == NULL) { 
         free(cwd);
         return 0; 
     }
-  //  printf("p4\n");
     
     i = 0;
     while (arr[i] != NULL) {
@@ -66,12 +62,8 @@ int setPaths(char **arr) {
         }
         i++;
     }
-   // printf("p7\n");
-
 
     paths[j] = NULL;
-
-   // printf("p8\n");
 
     free(cwd);
     return 0;
@@ -84,5 +76,5 @@ void freePaths() {
     int i = 0;
     if (check) { 
         while (paths[i] != NULL) { free(paths[i++]); } 
-}
+    }
 }

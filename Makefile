@@ -5,14 +5,17 @@ ship-shell:
 	gcc ./*.c -o ship-shell
 	$(clean)
 
-wish: bash.o interactive.o shell.o shellerror.o path.o
-	gcc -o wish bash.o interactive.o shell.o shellerror.o path.o
+wish: bash.o engine.o interactive.o shell.o shellerror.o path.o
+	gcc -o wish bash.o engine.o interactive.o shell.o shellerror.o path.o
 
 clean:
 	rm -f *.o
 
 bash.o: bash.c
 	gcc -c bash.c
+
+engine.o: engine.c
+	gcc -c engine.c
 
 interactive.o: interactive.c
 	gcc -c interactive.c

@@ -34,7 +34,6 @@ void interactiveMode() {
         str = strtok(line, " \t\r\n");
 
         while (str != NULL) {
-            //printf("HERE!!!!!!!! >>>>>>>>>>>>>>>>>>>  :%s", str);
             addSpaces(&str, '>');
             words[size++] = str;
             str = strtok(NULL, " \t\r\n");

@@ -19,18 +19,12 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
     setabPath();
-    //char **arr = getPaths();
-   // int i = 0;
-   // while (argv[i] != NULL) {
-      //  printf("Arg: %s PATH: %s\n", argv[i], arr[i]);
-      //  i++;
-  //  }
 
     //Enter interactive mode
     if (argc==1) {
         interactiveMode();
-    }
-    //Run bash mode with a text file
+    } 
+    //Bash mode
     else {
          if (bash(argv[1])) { 
             printerror();
@@ -41,6 +35,9 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 
+/**
+ * Sets the absolute path of exe
+*/
 void setabPath() {
     abPath = getcwd(NULL, 0);
     if (abPath == NULL) {

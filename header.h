@@ -3,6 +3,7 @@
 
 extern char *abPath;
 
+
 /**
  * This is the interactive mode for my shell.
 */
@@ -56,5 +57,17 @@ int bash(const char* word);
  * Adds spaces between key characters. Takes a *string and character key.
 */
 void addSpaces(char **str, char key);
+
+/**
+ * Reset the path string.
+*/
+void setNull(char *arr);
+
+/**
+ * Check if file exists.
+ * 
+ * @return 1 for yes, 0 for no
+*/
+int checkForFile(char *file);
 
 #endif // header
