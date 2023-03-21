@@ -19,10 +19,12 @@ char** getLines(const char *file);
 int checkForFile(char *file);
 void addSpaces(char **str, char key);
 void redirectStream(char **arr);
+int executeMultiCommands(char **voice);
 
 int ampNum;                                             //# of ampersands
 int redirNum;                                           //# of redirects
 int redirSpot;                                          //spot in array that > appears
+int lastAmpSpot;                                        //spot in array that & appears
 int numCommands;                                        //number of arguments. If no ampersents 1, otherwise N+1
 int localCommands;                                      //# of local built in commands found
 int length;                                             //size of array voice
@@ -47,12 +49,19 @@ int commandMode(char **voice, int size) {
     length = size;
 
     if (checkLC == -1 || checkOP == -1) { return 1; }   //Check for errors in check functions
+    if (ampNum && !strcmp(voice[0], AMPER_STR)) { return 0; }
+    
+    if (ampNum) { 
+        if (executeMultiCommands(voice)) { return 1; } 
+        return 0;
+    }
 
     if (checkLC && !checkOP) {                     //if there are local commands and Check that & and > are not used with local variables
         if (performLocalCommand(voice)) { return 1; }
+        return 0;
     }
 
-    if (executeCommand(voice) && !checkLC) { return 1; }
+    if (executeCommand(voice) && !checkLC && !ampNum) { return 1; }
 
     return 0;
 }
@@ -68,7 +77,10 @@ int checkOperators(char **arr) {
 
     int i = 0;
     while (arr[i] != NULL) {
-        if (!strcmp(arr[i], AMPER_STR)) { ampNum++; }
+        if (!strcmp(arr[i], AMPER_STR)) {  
+            ampNum++; 
+            lastAmpSpot = i;
+        }
         if (!strcmp(arr[i], REDIR_STR)) {
             redirNum++;
             redirSpot = i;
@@ -79,7 +91,6 @@ int checkOperators(char **arr) {
 
     //If more than one redirection throw an error.
     if (redirNum > 1) { return -1; }
-    if (ampNum > 0 && redirNum > 0) { return -1; }
 
     //If too many '>' or no file trailing '>'
     if (redirNum && (arr[redirSpot+1] == NULL || arr[redirSpot + 2] != NULL || !strcmp(arr[0], REDIR_STR))) { return -1; }
@@ -204,6 +215,32 @@ int executeCommand(char **arr) {
     }
 
     return 1;
+}
+
+int executeMultiCommands(char **voice) {
+
+    char *temp[0];
+
+    int x = 0;
+    int i = 0;
+    while (voice[i]) {
+        if (!strcmp(voice[i], AMPER_STR) && voice[i+1] == NULL) { return 0; }
+        if (!strcmp(voice[i], AMPER_STR) || voice[i+1] == NULL) { 
+             if (executeCommand(temp)) { return 1; }
+             x = 0;
+             while (temp[x]) { 
+                temp[x] = NULL;
+                x++;
+              }
+              x = 0;
+              i++;
+        } else {
+            temp[]
+        }
+
+    }
+
+    return 0;
 }
 
 /**
@@ -355,4 +392,32 @@ void redirectStream(char **arr) {
     close(STDOUT_FILENO);
     freopen(arr[redirSpot+1], "w", stdout);
     arr[redirSpot] = NULL;
+}
+
+char*** convToMultiLines(char **arr) {
+
+    int greatLineLength = 0;
+    int lineCount = 0;
+    int wordCount = 0;
+    int i = 0;
+    while (arr[i]) {
+
+        if (strcmp(arr[i], AMPER_STR)) { 
+            wordCount++; 
+        } else { 
+            lineCount++;
+            if (wordCount > greatLineLength) { greatLineLength = wordCount; }
+            wordCount = 0;
+         }
+
+         if (arr[i+1] == NULL) { 
+            lineCount++;
+            if (wordCount > greatLineLength) { greatLineLength = wordCount; }
+          }
+
+        i++;
+    }
+
+    char *temp[lineCount][greatLineLength+1];
+    i = 0;
 }
