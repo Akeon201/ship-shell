@@ -20,6 +20,8 @@ int checkForFile(char *file);
 void addSpaces(char **str, char key);
 void redirectStream(char **arr);
 int executeMultiCommands(char **voice);
+char*** convToMultiLines(char **arr);
+void freeMultiLines(char ***arr);
 
 int ampNum;                                             //# of ampersands
 int redirNum;                                           //# of redirects
@@ -89,14 +91,15 @@ int checkOperators(char **arr) {
     }
     numCommands = ampNum + 1;                       //for future when & is incorporated
 
-    //If more than one redirection throw an error.
-    if (redirNum > 1) { return -1; }
+    //If ampersands and redirections found.
+    if (ampNum > 0 && redirNum > 0) { return 1; }
+
+    //If more than one redirection AND NO AMPS throw an error.
+    if (redirNum > 1 && !ampNum) { return -1; }
 
     //If too many '>' or no file trailing '>'
-    if (redirNum && (arr[redirSpot+1] == NULL || arr[redirSpot + 2] != NULL || !strcmp(arr[0], REDIR_STR))) { return -1; }
+    if (redirNum && (arr[redirSpot+1] == NULL || arr[redirSpot + 2] != NULL || !strcmp(arr[0], REDIR_STR))) { return -1; }        // || arr[redirSpot + 2] != NULL
 
-    //If ampersands and redirections found.
-    if (ampNum > 0 || redirNum > 0) { return 1; }
 
     return 0;
 }
@@ -217,29 +220,52 @@ int executeCommand(char **arr) {
     return 1;
 }
 
-int executeMultiCommands(char **voice) {
+/**
+ * Modified execute command for children processes to use only.
+*/
+void runMultiCommand(char **arr) {
 
-    char *temp[0];
+    if (arr == NULL || arr[0] == NULL) { exit(0); }
+    resetGlobalVariables();
+    int checkOP = checkOperators(arr);                //checks for operators
+    if (checkOP == -1) { exit(1); }   //Check for errors in check functions
+    if (ampNum && !strcmp(arr[0], AMPER_STR)) { exit(0); }
 
-    int x = 0;
     int i = 0;
-    while (voice[i]) {
-        if (!strcmp(voice[i], AMPER_STR) && voice[i+1] == NULL) { return 0; }
-        if (!strcmp(voice[i], AMPER_STR) || voice[i+1] == NULL) { 
-             if (executeCommand(temp)) { return 1; }
-             x = 0;
-             while (temp[x]) { 
-                temp[x] = NULL;
-                x++;
-              }
-              x = 0;
-              i++;
-        } else {
-            temp[]
-        }
+    char **paths = getPaths();
+    char path[100] = {'\0'};
 
+    if (redirNum) { redirectStream(arr); }
+    while (paths[i] != NULL) {
+        strcat(path, paths[i]);
+        strcat(path, "/");
+        strcat(path, arr[0]);
+        execv(path, arr);
+        setNull(path);
+        i++;
     }
 
+    printerror();
+    exit(1);
+}
+
+/**
+ * Forks process for multiple line inputs and then waits for all children
+*/
+int executeMultiCommands(char **voice) {
+
+    char ***arr = convToMultiLines(voice);
+    pid_t pid;
+    int i = 0;
+    while (arr[i]) {
+        pid = fork();
+        if (pid == -1) { return 1; }
+        if (!pid) { runMultiCommand(arr[i]); }
+        i++;
+    }
+
+    while ((pid = waitpid(-1, NULL, 0)) > 0) { ; }
+    freeMultiLines(arr);
     return 0;
 }
 
@@ -404,7 +430,7 @@ char*** convToMultiLines(char **arr) {
 
         if (strcmp(arr[i], AMPER_STR)) { 
             wordCount++; 
-        } else { 
+        } else if (arr[i+1] != NULL) { 
             lineCount++;
             if (wordCount > greatLineLength) { greatLineLength = wordCount; }
             wordCount = 0;
@@ -418,6 +444,44 @@ char*** convToMultiLines(char **arr) {
         i++;
     }
 
-    char *temp[lineCount][greatLineLength+1];
+    char ***temp = malloc(sizeof(char **) * (lineCount + 1));
+    for (i = 0; i < lineCount + 1; i++) {
+        temp[i] = malloc(sizeof(char *) * (greatLineLength + 1));
+    }
+
     i = 0;
+    lineCount = 0;
+    wordCount = 0;
+    while (arr[i]) {
+        if (!strcmp(arr[i], AMPER_STR)) {
+            temp[lineCount++][wordCount] = NULL;
+            wordCount = 0;
+        } else {
+            temp[lineCount][wordCount++] = arr[i];
+        }
+        i++;
+    }
+
+    if (!strcmp(arr[i-1], AMPER_STR)) { 
+        temp[lineCount] = NULL;
+    } else { 
+        temp[lineCount][wordCount + 1] = NULL;
+        temp[lineCount + 1] = NULL;
+    }
+
+    
+    return temp;
 }
+
+/**
+ * Free allocated memory that multilines creates
+*/
+void freeMultiLines(char ***arr) {
+    int i = 0;
+    while (arr[i]) {
+        free(arr[i]);
+        i++;
+    }
+    free(arr);
+}
+
