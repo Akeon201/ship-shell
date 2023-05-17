@@ -1,4 +1,27 @@
-# ship-shell
-Shippensburg University Shell
+# Ship-Shell: A Linux Shell Implementation Project
+This README will guide you through the setup and utilization of the Ship-Shell project, a new Linux shell built using low-level system calls.
+  
+# Summary
+The Ship-Shell project is a hands-on exploration of the Linux shell environment and low-level system calls. The project 
+is built around a new Linux shell dubbed "Ship Shell," which supports several built-in commands such as "cd", "path", 
+and "exit". It also allows users to access commands from the "/bin" folder, change Path variables, and supports 
+features such as parallelism "&" and redirection ">".
+  
+# Setup
 
-&nbsp;&nbsp;&nbsp;&nbsp;As a programmer, I recently took on the challenge of creating a basic shell using C. Let me tell you, it was no small feat. However, I am proud to say that I have successfully implemented several built-in commands, including cd, path, and exit. These commands, which are integral to any shell, allow users to change directories, manipulate the path environment variable, and exit the shell respectively. But my project doesn't stop there. I also made sure to add the functionality for executing non built-in commands, which is a crucial feature of any shell. This was achieved by using paths that start in '/bin'. As a result, users can easily run commands like 'ls', 'grep', or 'cat' from within the shell.
+    1. Ensure you are in the correct file directory.
+    2. You must be in a Linux environment, or have a Linux subsystem installed on your Windows machine.
+    3. To create the executable, simply type make into the command line. You can also use the direct executable provided by 
+       typing ./ship-shell into the command line.
+
+# Usage
+
+To start using Ship Shell, follow these steps:
+
+    1. Run the executable by typing ./ship-shell into the command line.
+    2. Now, you should be in the Ship Shell environment. Here, you can use the built-in commands like cd, path, exit, and 
+    3. any commands available in the "/bin" folder.
+    4. To change the path variable, use the path command followed by the desired path.
+    5. The shell supports parallelism with "&". Simply append "&" to the end of your commands to run them in the background.
+    6. The shell also supports output redirection with ">". Just append ">" followed by the file name to your command, and the 
+    output will be redirected to the specified file.
