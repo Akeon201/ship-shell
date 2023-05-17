@@ -22,7 +22,7 @@ To start using Ship Shell, follow these steps:
 
     1. Run the executable by typing ./ship-shell into the command line.
     2. Now, you should be in the Ship Shell environment. Here, you can use the built-in commands like 
-    cd, path, exit, and any commands available in the "/bin" folder.
+       cd, path, exit, and any commands available in the "/bin" folder.
     4. To change the path variable, use the path command followed by the desired path.
     5. The shell supports parallelism with "&". Simply append "&" to the end of your commands to run 
        them in the background.
